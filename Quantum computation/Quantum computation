@@ -1,1 +1,1340 @@
+# Quantum Computation
 
+Mian knowledge point：
+
+1. density matrix: definition, convexity, orthonormal decomposition, purity, Von Neumann Entropy, reduced density matrix
+2. POVM measurement: definition 
+3. quantum channel: definition, Kraus representation, qubit noisy channels 
+4. T1 and T2 process: Bloch equation, quantum channel, Lindblad equation 
+5. Trace Distance and Fidelity: definition and calculation 
+6. CHSH inequality, maximal violation of Bell Inequality
+7. entangled state: definition, local operations and classical communication (LOCC), entanglement entropy 
+8. (strong) Church-Turing thesis 
+9. analysis of algorithmic complexity, definition of P/NP/NPC 
+10. quantum gate, quantum circuit, universal quantum gate set
+11. Deutsch’s Algorithm, quantum Fourier transform circuit, Quantum phase estimation 
+12. quantum simulation, Trotterization Technique 
+13. DiVincenzo’s Criteria 
+14. quantum gate implementation/state preparation on two-level system, rotating frame transformation 
+15. repetition code, error correction threshold
+
+---
+
+## I. Quantum Mechanics
+
+![1.png](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/1.png)
+
+量子态/Density Matrix：量子态由密度矩阵$ρ=∑_ip_i|ψi⟩⟨ψi|$描述，满足：厄米性($ρ^†=ρ$); 半正定性; 归一化($Trρ=1,Trρ$是概率)
+
+量子测量/Positive-operator Valued Measure：POVM 测量是一组半正定算子 $∑_iE_i = I$
+
+量子操作/Completely Positive Trace-preserving Map： 量子操作是密度矩阵空间上的一个线性映射，满足完全正，保迹.
+
+**Subsystem in a Large System**
+
+1. 大系统处于纯态，子系统一般由混态描述
+2. 在大系统上作投影测量，子系统上一般由 POVM 测量描述
+    1. $*A = ∑_iλ_iP_i$* ，设系统处于态 *ρ*, 那么测量 *A* 得到：以 $Tr (ρP_i) = ρ_{ii}$的概率得到 *A* 的一个本征值 $λ_i$；
+        
+        系统态变换到$\rho \rightarrow \frac{P_i \rho P_i}{\operatorname{Tr}\left(\rho P_i\right)}$, *A* 的观测期望值为$TrρA$
+        
+    2. **POVM （更高维度空间的投影测量）**
+        
+        $∑_iE_i=I       ~~  E_i=M_i^†M_i$即$∑_iM_i^†M_i=I$ 
+        
+        塌缩到：$\rho^{\prime}=\frac{M_i\rho M_i^{\dagger}}{Tr(\rho M_i^{\dagger}M_i)}$  概率：$Tr(M_i^{\dagger}M_i \rho)$
+        
+        一个 d 维量子系统的密度矩阵由$d^2−1$ 个独立的实参数描述。一次投影测量有 $d$数据，其中$d−1$个是独立的。至少需要$(d^2-1)/(d-1) = d+1$ 次投影观测量，而相应地总共所记录的数据量为 $d(d + 1)$。这意味着 存在数据冗余信息。如果在 POVM 的框架内，则可以构建更优的测量方案。
+        
+        ![2.png](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/2.png)
+        
+    
+3. 在大系统上的幺正操作，子系统上一般由量子操作描述
+    
+    ### Convex Decomposition
+    
+- convex combination : 线性组合+系数半正定且归一
+- convex set：总量的凸组合的2个分量都在C域
+- extreme point：凸集中不能表示成其他两点凸组合的点
+- Convex Set of Mixed States
+    - 密度矩阵的集合是**有界闭凸集**（在$R^{4n} − 1$维空间中半径为$\sqrt{2^n-1}$的球面内），凸集的**极点由所有纯态**（一维投影）构成。
+    - 密度矩阵的凸组合分解所需的最少的纯态的个数等于密度矩阵的秩
+    - 密度矩阵本征值为0的态在凸集的边界上，但不一定是纯态；纯态一定在边界
+    - $d = 2$ 情形，密度矩阵的集合完全对应于 Bloch 球，所有纯态的集合与边界重合。
+        
+        $d ≥ 3$ 情形，广义 Bloch 球上不是每个点都对应于量子态，所有纯态的集合真包含于边界
+        
+
+### Orthonomal Decomposition
+
+基石: Hermition Matrix的集合构成向量空间
+
+$⟨A,B⟩=Tr(AB)$满足内积定义：正定、分配律、交换律、结合律
+
+$\displaystyle\rho=\frac{1}{2^{n}} I^{\otimes n}+\frac{1}{2^{n}} \sum_{k=1}^{4^{n}-1} x_{k} P_{k}, \quad x_{k}=\operatorname{Tr}\left(\rho P_{k}\right)$称为广义Bloch矢量，$Tr (P_kP_j)/2n = δ_{kj}, k,j = 0, …,4n − 1$
+
+### Quantifying Mixedness
+
+- **Purity**$p=\operatorname{Tr} \rho^{2}~~~~~~~~~~~~\frac{1}{2^{n}} \leq \operatorname{Tr} \rho^{2} \leq 1$
+- Entropy
+    - 经典信息熵 - Shannon entropy: $H(X)=-\sum_{i=1}^{n} p_{i} \log p_{i}$
+    - **Von Neumann entropy** of $S(ρ) =  − Tr (ρlog ρ)$ $\text { If } \lambda=\left\{\lambda_{i}\right\} \text { are the eigenvalues of}  \rho，S(\rho)=H(\lambda)=-\sum_{i=1}^{n} \lambda_{i} \log \lambda_{i}$
+
+### Composite System and Subsystem (reduced density martix)
+
+经典：联合概率分布
+
+量子：约化密度矩阵
+
+$ρ_A = Tr_B(ρ_{AB}) = ∑_b(I_A⊗⟨b|)ρ_{AB}(I_A⊗|b⟩)$
+
+$$
+\begin{aligned}
+\bar{O} & =\operatorname{Tr}\left[\left(O \otimes I_B\right) \rho_{A B}\right] \\
+& =\sum_{a, b}\left(\left\langle a|\otimes\langle b|)\left(O \otimes I_B\right) \rho_{A B}(|a\rangle \otimes|b\rangle)\right.\right. \\
+& =\sum_{a, b}\left(\langle a| \otimes I_B\right) \underbrace{\left(I_A \otimes\langle b|\right)\left(O \otimes I_B\right)}_{\text {commute }} \rho_{A B}\left(|a\rangle \otimes I_B\right)\left(I_A \otimes|b\rangle\right) \\
+& =\sum_a\left(\langle a| \otimes I_B\right)\left(O \otimes I_B\right)\left[\sum_b\left(I_A \otimes\langle b|\right) \rho_{A B}\left(I_A \otimes|b\rangle\right)\right]\left(|a\rangle \otimes I_B\right) \\
+& =\operatorname{Tr}\left(O_A\right)
+\end{aligned}
+$$
+
+- 直积态：$ρ_{AB} = ρ_A ⊗ ρ_B$                $Tr_B(ρ_{AB}) = ρ_A     Tr_A(ρ_{AB}) = ρ_B$
+- 最大纠缠态：$\rho  =\left(\frac{|0\rangle|0\rangle+|1\rangle|1\rangle}{\sqrt{2}}\right)\left(\frac{\langle 0|\langle 0|+\langle 1|\langle 1|}{\sqrt{2}}\right)  =\frac{|00\rangle\langle 00|+| 11\rangle\langle 00|+| 00\rangle\langle 11|+| 11\rangle\langle 11|}{2}$
+    
+    $\rho_1  =\operatorname{Tr}_2(\rho) =(I \otimes\langle 0|) \rho(I \otimes|0\rangle)+(I \otimes\langle 1|) \rho(I \otimes|1\rangle) =\frac{|0\rangle\langle 0|+| 1\rangle\langle 1|}{2} =\frac{I}{2}$
+    
+    Purification: $Tr_B[\left|ψ\right\rangle\left\langle  ψ\right|] = ρ_A$
+    
+    $$
+    \begin{aligned}
+    \operatorname{Tr}_B(|\psi\rangle\langle\psi|) & =\sum_{i j} \sqrt{p_i p_j}\left|i_A\right\rangle\left\langle j_A\right| \operatorname{Tr}\left(\left|i_B\right\rangle\left\langle j_B\right|\right) \\
+    & =\sum_{i j} \sqrt{p_i p_j}\left|i_A\right\rangle\left\langle j_A\right| \delta_{i j} \\
+    & =\sum_i p_i\left|i_A\right\rangle\left\langle i_A\right| \\
+    & =\rho_A 
+    \end{aligned}
+    $$
+    
+
+---
+
+## II. Operational Quantum Mechanics
+
+### 超算符：将算符映射成算符号
+
+正定，完全正定       e.g: 转置操作
+
+### Channel
+
+定义：线性     保迹 $\rho^{\prime}=\frac{P_i\rho P_i}{Tr(\rho P_i)}$     完全正定
+
+表示：Kraus表示（算符求和表示）
+
+$ℰ(ρ) = ∑_iE_iρE_i^†    ~~~∑_iE_i^†E_i = I$
+
+密度矩阵在不同基矢上，关键点找**完备算符组**
+
+实现：幺正操作作用在扩展系统上，系统的输出态
+
+![3.png](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/3.png)
+
+$$
+\begin{aligned}\mathcal{E}\left(\rho_S\right) & =\sum_\mu\left\langle\mu\left|U\left(\rho_S \otimes \rho_E\right) U^{\dagger}\right| \mu\right\rangle \\
+& =\sum_{\mu \nu}\left\langle\mu\left|U\left(\rho_S \otimes \lambda_\nu|\nu\rangle\langle\nu|\right) U^{\dagger}\right| \mu\right\rangle \\& =\sum_{\mu \nu}\lambda_\nu\left\langle\mu\left|U\left(\rho_S\otimes I)(I\otimes|\nu\rangle\langle\nu| \right) U^{\dagger}\right| \mu\right\rangle \\& =\sum_{\mu \nu}\lambda_\nu\left\langle\mu\left|U\left(\rho_S\otimes I)(I\otimes|\nu\rangle)(I\otimes\langle\nu| \right) U^{\dagger}\right| \mu\right\rangle ~~~~~~~~~(I\otimes\langle\nu|) U^{\dagger}(I\otimes| \mu\rangle) 简写省去I直积 \\ & =\sum_{\mu \nu}\lambda_\nu\left\langle\mu\left|U\left(\rho_S\otimes |\nu\rangle\right)\langle\nu| U^{\dagger}\right| \mu\right\rangle \\
+& =\sum_{\mu \nu}\lambda_\nu\left\langle\mu\left|U\textcolor{red}{\underline{\underline{(I\otimes |\nu\rangle)\left(\rho_S\otimes 1\right)}}}\langle\nu| U^{\dagger}\right| \mu\right\rangle \\ & =\sum_{\mu \nu} \sqrt{\lambda_\nu}\langle\mu|U| \nu\rangle \rho_S \sqrt{\lambda_\nu}\left\langle\nu\left|U^{\dagger}\right| \mu\right\rangle \\& =\sum_{\mu \nu} E_{\mu \nu} \rho_S E_{\mu \nu}^{\dagger}\end{aligned}
+$$
+
+**定义Kraus算子**： $E_{\mu \nu}=\sqrt{\lambda_\nu}(I \otimes\langle\mu|) U(I \otimes |\nu\rangle),~\mu\ ~and ~~\nu \text{(原环境)}~~\text{are bases of environment}$
+
+类似于 POVM 情形，我们现在是要找这样的一个高维幺正矩阵，使得：
+
+$$
+U=\left(\begin{array}{cccc}
+E_1 & * & * & \ldots \\
+E_2 & * & * & \ldots \\
+E_3 & * & * & \ldots \\
+\vdots & * & * & \ldots
+\end{array}\right)
+$$
+
+例子：
+
+1.  Unitary Channel            $ℰU(ρ) = UρU†$
+2. Random Unitary Channel
+3.  Average Unitary Channel           $\mathcal{E}(\rho)=\frac{1}{d}I$
+4. Complete State-space Contraction Channel, into a fixed state
+5. Partial Trace, Kraus算子是 I
+6. Quantum Measurement Channel：
+
+$$
+\rho_i=\frac{M_i\rho M_i^{\dagger}}{Tr(M_i\rho M_i^{\dagger})}
+$$
+
+$Tr[M_iρM_i^†]$ 的概率测得 *i*, 相当于态为$ρ = ∑_ip_iρ_i = ∑_iM_iρM_i^†$,这种是非选择性测量. 测量算子即为 Kraus 算子
+
+### 数学性质
+
+凸性、传递性  相等性
+
+### Noisy Channels
+
+1. Bit Noisy Channels: Binary Symmetric channel…
+2. Qubit Noisy Channels
+    
+    ***Geometric Bloch Representation***:
+    
+    $$
+    \rho=\frac{1}{2} I+\frac{1}{2}\left(r_x \sigma_x+r_y \sigma_y+r_z \sigma_z\right)=\frac{1}{2}(I+\boldsymbol{r} \cdot \boldsymbol{\sigma})
+    $$
+    
+    Let ℰ be a channel with Kraus operators {*Ei*}, it maps *ρ* to *ρ*′ as
+    
+    $$
+    \rho^{\prime}=\sum_i E_i \rho E_i^{\dagger}=\frac{1}{2} \sum_i E_i E_i^{\dagger}+\frac{1}{2} \sum_i \sum_\beta r_\beta E_i \sigma_\beta E_i^{\dagger}
+    $$
+    
+    Suppose $\rho^{\prime}=\frac{1}{2}\left(I+\boldsymbol{r}^{\prime} \cdot \boldsymbol{\sigma}\right)$, then
+    
+    $$
+    r_\alpha^{\prime}=\operatorname{Tr}\left(\rho^{\prime} \sigma_\alpha\right)=\underbrace{\frac{1}{2} \sum_i \operatorname{Tr}\left[E_i E_i^{\dagger} \sigma_\alpha\right]}_{c_\alpha}+\sum_\beta \underbrace{\left(\frac{1}{2} \sum_i \operatorname{Tr}\left[E_i \sigma_\beta E_i^{\dagger} \sigma_\alpha\right]\right)}_{M_{\alpha \beta}} r_\beta \\
+    $$
+    
+    $$
+    r^′ = Mr + c
+    $$
+    
+    1. Bit-flip Channel and Phase-flip Channel
+        1. error due to X flip (Bit)
+            
+            $$
+            ℰ(ρ) = pρ + (1 − p)XρX
+            $$
+            
+            the Kraus elements are $E_0=\sqrt{p} I~ and ~E_1=\sqrt{1-p} X$
+            
+        2. error due to Z flip (phase)
+            
+            $$
+            ℰ(ρ) = pρ + (1 − p)ZρZ
+            $$
+            
+            the Kraus elements are $E_0=\sqrt{p} I~ and ~E_1=\sqrt{1-p} Z$
+            
+    2. Pauli Channel
+        
+        $$
+        ℰ(ρ) = (1−p_1−p_2−p_3)ρ + p_1XρX + p_2YρY + p_3ZρZ
+        $$
+        
+        In Kraus representation, $E_0=\sqrt{1-p_1-p_2-p_3} I, \quad E_1=\sqrt{p_1} X, \quad E_2=\sqrt{p_2} Y, \quad E_3=\sqrt{p_3} Z$
+        
+        - ***Pauli Channel in Bloch representation***,
+        
+        $$
+        \boldsymbol{r} \rightarrow M \boldsymbol{r}=\left[\begin{array}{ccc}
+        1-2\left(p_2+p_3\right) & 0 & 0 \\
+        0 & 1-2\left(p_1+P_3\right) & 0 \\
+        0 & 0 & 1-2\left(p_1+p_2\right)
+        \end{array}\right]\left(\begin{array}{l}
+        r_x \\
+        r_y \\
+        r_z
+        \end{array}\right) 
+        $$
+        
+    3. Depolarizing Channel
+    
+        
+        Consider a quantum noise acting on a qubit that
+        
+        > with probability $p$, lose the qubit information completely
+        
+        > with probability $1 − p$, the qubit unchanged.
+        
+        $$
+                \begin{aligned}                        \mathcal{E}(\rho) & =p I / 2+(1-p) \rho \\                        & =\left(1-\frac{3 p}{4}\right) \rho+\frac{p}{4}(X \rho X+Y \rho Y+Z \rho Z)                        \end{aligned}
+        $$
+        
+    4. Amplitude Damping Channel（**energy dissipative processes 非幺**）
+        
+        例子：
+        
+        - 二能级激发态基态
+            
+            One Kraus operator is obvious, the transition from the excited state to the ground state is
+            
+            $$
+                         E_1=\sqrt{p}|0\rangle\langle 1|=\left(\begin{array}{cc}                                0 &\sqrt{p} \\                                0 & 0                                \end{array}\right)
+            $$
+            
+            The second Kraus operator should keep the ground state $|0\rangle\rightarrow|0\rangle$in place, i.e., contains$|0⟩⟨0|$, but is is not enough. In general, suppose
+            
+            $$
+                        E_0=|0\rangle\langle 0|+A=\left(\begin{array}{ll}                                1 &a \\                                b &c                                \end{array}\right)
+            $$
+            
+            and the normalization condition $E_0^{\dagger} E_0+E_1^{\dagger} E_1=I$becomes
+            
+            To satisfy the above condition, we need $a=b=0$ and $c=\sqrt{1-p}$, therefore
+            
+            $$
+              E_0=\left(\begin{array}{cc}                                1 &0 \\                                0 & \sqrt{1-p}                                \end{array}\right)
+            $$
+            
+            The factor $\sqrt{1-p}$ reduces the amplitude of $|1⟩$ state, expressing the fact that not observing an emission event increases the likelihood that the system is in its ground state.
+            
+        - Consider an atom interacted with electromagnetic field. There is a probability $p$ that the excited state $|1⟩$  has decayed to the ground state $|0⟩$  and a photon has been emitted, so that the environment has made a transition from the state $|0⟩$ ( “no photon”) to$|1⟩$  (“one photon”):
+            
+            $$
+            \begin{aligned}
+            & |0\rangle_S \otimes|0\rangle_E \rightarrow|0\rangle_S \otimes|0\rangle_E, \\
+            
+            & |1\rangle_S \otimes|0\rangle_E \rightarrow \sqrt{1-p}|1\rangle_S \otimes|0\rangle_E+\sqrt{p}|0\rangle_S \otimes|1\rangle_E .
+            
+            \end{aligned}
+            $$
+            
+            Now we evaluate what happens to the atomic state，耦合前环境的$ρ_E=|0⟩⟨0|$
+            
+            $$
+            \begin{aligned}
+            \mathcal{E}(\rho) & =\operatorname{Tr}_E\left[U(\rho \otimes|0\rangle\langle 0|) U^{\dagger}\right] \\
+            & =(I \otimes\langle 0|) U(\rho \otimes|0\rangle\langle 0|) U^{\dagger}(I \otimes|0\rangle)+(I \otimes\langle 1|) U(\rho \otimes|0\rangle\langle 0|) U^{\dagger}(I \otimes|1\rangle) \\
+            & =\underbrace{(I \otimes\langle 0|) U(I \otimes|0\rangle)}_{E_0} \rho(I \otimes\langle 0|) U^{\dagger}(I \otimes|0\rangle)+\underbrace{(I \otimes\langle 1|) U(I \otimes|0\rangle)}_{E_1} \rho(I \otimes\langle 0|) U^{\dagger}(I \otimes|1\rangle)
+            \end{aligned}
+            $$
+            
+            The first Kraus operator is
+            
+            $\begin{aligned}
+            E_0 & =[(|0\rangle\langle 0|+| 1\rangle\langle 1|) \otimes\langle 0|] U[(|0\rangle\langle 0|+| 1\rangle\langle 1|] \otimes|0\rangle) \\
+            
+            & =|0\rangle\langle 00|U| 00\rangle\langle 0|+| 1\rangle\langle 10|U| 00\rangle\langle 0|+| 0\rangle\langle 00|U| 10\rangle\langle 1|+| 1\rangle\langle 10|U| 10\rangle\langle 1| \\
+            
+            & =|0\rangle\langle 0|+\sqrt{1-p}| 1\rangle\langle 1|=\left(\begin{array}{cc}
+            
+            1 & 0 \\
+            
+            0 & \sqrt{1-p}
+            
+            \end{array}\right)
+            
+            \end{aligned}$
+            
+            The other Kraus operator can be similarly obtained to be $E_1=\left(\begin{array}{cc}0 & \sqrt{p} \\ 0 & 0\end{array}\right)$.
+            
+            - The ***amplitude damping channel in the Bloch representation*** reads
+            
+            $$
+            \begin{aligned}
+            r & \rightarrow M r+c \\
+            
+            & =\left[\begin{array}{ccc}
+            
+            \sqrt{1-p} & 0 & 0 \\
+            
+            0 & \sqrt{1-p} & 0 \\
+            
+            0 & 0 & 1-p
+            
+            \end{array}\right]\left(\begin{array}{l}
+            
+            r_x \\
+            
+            r_y \\
+            
+            r_z
+            \end{array}\right)+\left(\begin{array}{l}
+            
+            0 \\
+            
+            0 \\
+            
+            p
+            
+            \end{array}\right)
+            
+            \end{aligned}
+            $$
+            
+    5. Phase Damping Channel ( **decoherence processes**)
+        
+        Phase damping channel has the following Kraus representation descriptions:
+        
+        1. random unitary channel
+            
+            $$
+            ℰ(ρ) = ∫θdθp(θ)Rz(θ)ρRz†(θ)
+            $$
+            
+        2. phase flip channel
+         where  $2p−1=e−λ$
+            
+            $$
+            E_0=\sqrt{p}            \left(\begin{array}{cc}                                1 &0\\        0 &1                                \end{array}            \right)            ~~~~~~~~~~            E_1=\sqrt{1-p}\left(\begin{array}{cc}                                1 &0\\            0 &-1                                \end{array}            \right)
+            $$
+            
+        3. representation composed of two Kraus elements
+            
+            $$
+               E_0=            \left(\begin{array}{cc}                                1 &0\\           0 &\sqrt{1-\lambda}                                \end{array}            \right)            ~~~~~~~~~~            E_1=            \left(\begin{array}{cc}                                0 &0\\            0 &\sqrt{\lambda}                                \end{array}            \right)
+            $$
+            
+            *e*.*g* : *双自旋* H
+            
+            $$
+             H=\frac{1}{2} g \sigma_z \otimes \sigma_x=g\left(\begin{array}{cc}                1 / 2 & 0 \\               0 & -1 / 2                \end{array}\right) \otimes \sigma_x
+            $$
+            
+            Suppose the second spin starts at state $|0\rangle$. After time $t$, the evolution operator of the total system is $U=\exp (-i H t)$. It operates as
+            
+            $$
+              \begin{aligned}        & |00\rangle=|0\rangle \frac{|+\rangle+|-\rangle}{\sqrt{2}} \rightarrow \frac{e^{-i g t / 2}|0+\rangle+e^{i g t / 2}|0-\rangle}{\sqrt{2}}=\cos (g t / 2)|00\rangle-i \sin (g t / 2)|01\rangle, \\        & |10\rangle=|1\rangle \frac{|+\rangle+|-\rangle}{\sqrt{2}} \rightarrow \frac{e^{i g t / 2}|1+\rangle+e^{-i g t / 2}|1-\rangle}{\sqrt{2}}=\cos (g t / 2)|10\rangle+i \sin (g t / 2)|11\rangle      \end{aligned}
+            $$
+            
+            Tracing over the environment gives the operation elements
+            
+            $$
+                    \begin{aligned}        & E_0=(I \otimes\langle 0|) U(I \otimes|0\rangle)=\cos (g t / 2)\left(\begin{array}{ll}        1 & 0 \\        0 & 1        \end{array}\right) \rightarrow \sqrt{p}\left(\begin{array}{ll}        1 & 0 \\       0 & 1        \end{array}\right) \\        & E_1=(I \otimes\langle 1|) U(I \otimes|0\rangle)=-i \sin (g t / 2)\left(\begin{array}{cc}        1 & 0 \\        0 & -1        \end{array}\right) \rightarrow \sqrt{1-p}\left(\begin{array}{cc}        1 & 0 \\        0 & -1        \end{array}\right)         \end{aligned}
+            $$
+            
+            where $p=cos2(gt/2)$, and $i$ has no effect in Kraus representation hence can be ignored.
+            
+            EXAMPLE. Consider an interaction between a harmonic oscillator and a spin
+            
+            $$
+             H=g a^{\dagger} a \otimes \sigma_x=g\left(\begin{array}{ll}
+            0 & 0 \\
+            0 & 1
+            \end{array}\right) \otimes \sigma_x .
+            $$
+            
+            Consider only the $|0⟩$ and $|1⟩$ states of the oscillator as our system, taking the environment spin initially be $|0⟩$. The Hamiltonian is actually equivalent to the previous example. The evolution operator operates as 
+            
+            $$
+            \begin{aligned}
+            & |00\rangle=|0\rangle \frac{|+\rangle+|-\rangle}{\sqrt{2}} \rightarrow|0\rangle \frac{|+\rangle+|-\rangle}{\sqrt{2}}=|00\rangle, \\
+            & |10\rangle=|1\rangle \frac{|+\rangle+|-\rangle}{\sqrt{2}} \rightarrow \frac{e^{-i g t}|1+\rangle+e^{i g t}|1-\rangle}{\sqrt{2}}=\cos (g t)|10\rangle-i \sin (g t)|11\rangle .
+            \end{aligned}
+            $$
+            
+            Tracing over the environment gives the operation elements 
+            
+            where $λ=1−cos2(gt)$. Again, coefficient *i* does not matter. In Nelson & Chuang’s book (p384), the example is coupled oscillators $H=ga^†a(b+b^†)$.
+            
+        
+        $$
+        \begin{aligned}
+        & E_0=(I \otimes\langle 0|) U(I \otimes|0\rangle)=\left(\begin{array}{cc}
+        1 & 0 \\
+        0 & \cos (g t)
+        \end{array}\right) \longrightarrow\left(\begin{array}{cc}
+        1 & 0 \\
+        0 & \sqrt{1-\lambda}
+        \end{array}\right), \\
+        & E_1=(I \otimes\langle 1|) U(I \otimes|0\rangle)=-i\left(\begin{array}{cc}
+        0 & 0 \\
+        0 & \sin (g t)
+        \end{array}\right) \longrightarrow\left(\begin{array}{cc}
+        0 & 0 \\
+        0 & \sqrt{\lambda}
+        \end{array}\right) .
+        \end{aligned}
+        $$
+        
+        - ***Phase damping channel in Bloch representation***
+        
+        $$
+        r \rightarrow M \boldsymbol{r}=\left[\begin{array}{ccc}
+        2 p-1 & 0 & 0 \\
+        0 & 2 p-1 & 0 \\
+        0 & 0 & 1
+        \end{array}\right]\left(\begin{array}{l}
+        r_x \\
+        r_y \\
+        r_z
+        \end{array}\right)
+        $$
+        
+    
+    **Unital Channel** $ℰ(I) = I$
+    
+    - unitary channel
+    - bit-flip channel
+    - phase-flip channel
+    - depolarizing channel
+    - phase damping channel
+    
+    **non-unital**
+    
+    - amplitude damping channel #### Chi Matrix Representation
+
+## III. Open Quantum System –Bloch、Lindblad equation
+
+### 1. System-Environment Coupling
+
+常见的开放量子 过程包括耗散、退相干、弛豫、Markovian 或 non-Markovian 等
+
+e.g: 光与原子相互作用、 液态核磁共振系统、 中心自旋模型的退相干
+
+### 2. Markovian Process (只与上一时刻有关)
+
+- Bloch Equation
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled.png)
+    
+    longitudinal $T1 : M_{z} = M_0(1 − e^{ − t/T1})$
+    
+    transverse $T2 : M_{x, y} = M_0(1 − e^{ − t/T2})$
+    
+    $$
+        \frac{d \boldsymbol{M}}{d t}=\underbrace{\boldsymbol{M} \times \gamma \boldsymbol{B}}_{\text {Precession }}-\underbrace{\frac{M_x \hat{i}+M_y \hat{j}}{T_2}}_{\begin{array}{c}    \text { Transverse } \\    \text { relaxation }    \end{array}}-\underbrace{\frac{\left(M_z-M_0\right) \hat{k}}{T_1}}_{\begin{array}{c}    \text { Longitudinal } \\    \text { relaxation }    \end{array}}
+    $$
+    
+    In matrix form
+    
+    $$
+        \begin{aligned}    \frac{d}{d t}\left(\begin{array}{c}    M_x \\    M_y \\    M_z    \end{array}\right)= & {\left[\begin{array}{ccc}    0 & \gamma B_z & -\gamma B_y \\    -\gamma B_z & 0 & \gamma B_x \\    \gamma B_y & -\gamma B_x & 0    \end{array}\right]\left(\begin{array}{l}    M_x \\    M_y \\    M_z    \end{array}\right)+} \\    & {\left[\begin{array}{ccc}    -1 / T_2 & 0 & 0 \\    0 & -1 / T_2 & 0 \\    0 & 0 & -1 / T_1    \end{array}\right]\left(\begin{array}{l}    M_x \\    M_y \\    M_z    \end{array}\right)+\left(\begin{array}{c}    0 \\    0 \\    M_0 / T_1    \end{array}\right) }    \end{aligned}
+    $$
+    
+    - Rabi Resonance
+        
+        $$
+         \omega_0=-\gamma B_z
+        $$
+        
+        $$
+                H(t)=\omega_0 \sigma_z / 2+\Omega(t)\left[\cos (\omega t) \sigma_x / 2+\sin (\omega t) \sigma_y / 2\right]
+        $$
+        
+        ![5.png](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/5.png)
+        
+          Initial motivation is to determine signs of magnetic moments.
+          Define the rotating frame transformation$U^{\mathrm{rot}}(t)=e^{i \omega t \sigma_z / 2} U(t)$
+        
+        , then in the rotating frame
+        
+        $$
+          \begin{aligned}
+          \dot{U}^{\mathrm{rot}}(t) & =i \omega \sigma_z / 2 e^{i \omega t \sigma_z / 2} U(t)+e^{i \omega t \sigma_z / 2} \dot{U}(t) \\
+          & =i \omega \sigma_z / 2 U^{\mathrm{rot}}(t)-i e^{i \omega t \sigma_z / 2} H e^{-i \omega t \sigma_z / 2} U^{\mathrm{rot}}(t) \\
+          & =-i\left[\left(\omega_0-\omega\right) \sigma_z / 2+\Omega(t) \sigma_x / 2\right] U^{\mathrm{rot}}(t) 
+          \end{aligned}
+        $$
+        
+        Therefore, the Bloch equation in  rotating frame is
+        
+        $$
+          H^{\text{rot}}=\Delta\sigma_z/2+\Omega(t)\sigma_x/2
+        $$
+        
+        $$
+         \frac{d}{d t}\left(\begin{array}{c}
+          M_x \\
+          M_y \\
+          M_z
+          \end{array}\right)=\left[\begin{array}{ccc}
+          -1 / T_2 & -\Delta & 0 \\
+          \Delta & -1 / T_2 & -\Omega \\
+          0 & \Omega & -1 / T_1
+          \end{array}\right]\left(\begin{array}{c}
+          M_x \\
+          M_y \\
+          M_z
+          \end{array}\right)+\left(\begin{array}{c}
+          0 \\
+          0 \\
+          M_0 / T_1
+          \end{array}\right)
+        $$
+        
+    - Transient Dynamics
+        
+        Analytic solution in free relaxation, i.e., $B_x=B_y=0$. For example, suppose the system is  $r=(r_0,r_1,r_2,r_3)^T$, where $r_0≡1$. initially at state $M(0) = (M_0,0,0)$, then the dynamic solution is
+        
+        $$
+         \rho=r_0 I / 2+r_1 \sigma_x / 2+r_2 \sigma_y / 2+r_3 \sigma_z / 2
+        $$
+        
+        $$
+             r=(r_0,r_1,r_2,r_3)^T\text{, where $r_{0}=1$}~~~~        \frac{d}{d t} \boldsymbol{r}(t)=A \boldsymbol{r}(t)
+        $$
+        
+        $$
+               \frac{d}{d t}\left(\begin{array}{c}        1 \\       r_1 \\        r_2 \\        r_3        \end{array}\right)=\left[\begin{array}{cccc}        0 & 0 & 0 & 0 \\        0 & -1 / T_2 & \gamma B_z & -\gamma B_y \\        0 & -\gamma B_z & -1 / T_2 & \gamma B_x \\        -M_0 & \gamma B_y & -\gamma B_x & -1 / T_1        \end{array}\right]\left(\begin{array}{c}        1 \\        r_1 \\        r_2 \\        r_3        \end{array}\right)
+        $$
+        
+        Its formal solution is
+        
+        $$
+          \boldsymbol{r}(t)=e^{A t} \boldsymbol{r}(0)
+        $$
+        
+        Numerical solution. Write density matrix $\rho$ in the form of a four vector No general analytic solution.
+        
+    - Steady State Dynamics Question. Can $T_1$ and $T_2$ be arbitrary?
+        
+        In free relaxation, there is a unique fixed point state namely the equilibrium state 
+        
+        $$
+        \forall \rho(0), \quad \lim _{t \rightarrow \infty} \rho(t) \rightarrow \rho_{e q}
+        $$
+        
+        Consider the Rabi resonance model, suppose $Δ$ and $Ω$ are constant, the steady state of the Bloch equation can be found by solving $\frac{d \boldsymbol{M}}{d t}=0$  
+        
+        which gives 
+        
+        $$
+        \begin{aligned} & M_x=\frac{\Delta \Omega M_0}{\Delta^2+\Omega^2 T_1 / T_2+1 / T_2^2}, \\ & M_y=-\frac{\Omega M_0 / T_2}{\Delta^2+\Omega^2 T_1 / T_2+1 / T_2^2}, \\ & M_z=M_0-\frac{\Omega^2 M_0 T_1 / T_2}{\Delta^2+\Omega^2 T_1 / T_2+1 / T_2^2} \end{aligned}
+        $$
+        
+        ![6.png](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/6.png)
+        
+        Numerical solution. Write density matrix $\rho$ in the form of a four vector
+        No general analytic solution.
+        
+    - Quantum Channel Description
+        - Amplitude Damping Channel for T1
+            
+            ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%201.png)
+            
+        - Generalized Amplitude Damping Channel for T1
+            
+            ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%202.png)
+            
+        - Phase Damping Channel for T2
+            
+            ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%203.png)
+            
+        - Quantum Channel for Both T1 and T2
+            
+            ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%204.png)
+            
+- Lindblad Equation
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%205.png)
+    
+    - From Kraus Representation to Lindblad Equation
+    - Lindblad Operators for Phase Damping Channel & Amplitude Damping Channel
+    - Lindblad Operators for T1 and T2 Process
+    - Lindblad Equation in Bloch Representation
+    
+
+---
+
+## IV. Distance Measure Between Quantum States —— Trace Distance and Fidelity
+
+### Mathematical concepts
+
+$x = [x^1, . . . , x^n]^T$ , and for $0 < p < ∞$, the $L_p$-norm is$∥x∥_p =(∑^n_{
+i=1}
+|x_i|^p)^{1/p}$
+
+![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%206.png)
+
+### Distance Measure for Classical Information
+
+- Trace distance
+    
+    $D(p, q) = \frac{1}{2}∑_{i∈Ω}|p_i − q_i|$
+    
+- Fidelity
+    
+    $F(p, q) =∑_{i∈Ω}\sqrt{p_iq_i}$
+    
+
+### Distance Measure for Quantum Information
+
+- Trace distance
+    
+    $D(ρ, σ) = \frac{1}{2}∥ρ − σ∥_1 = \frac{1}{2}Tr[\sqrt{(ρ − σ)^†(ρ − σ)}]$
+    
+- Fidelity
+    
+    $F(ρ, σ) = Tr\sqrt{ρ^{1/2}σρ^{1/2}}$
+    
+
+---
+
+## V. Quantum Entanglement — Bell Theorem, Entangled State
+
+### Quantum nonlocality
+
+- Copenhagen interpretation: wave function, Born’s rule, uncertainty principle
+- EPR paradox: complete and reality, Bhom’s spin approch to EPR (spooky action at a distance, hidden variables — reason to possibility)
+- Bell’s theorem (QM is incompatible with hidden-variable)
+    - two assumptions of a local hidden variable theory: **realism**(the measurement values exist independent of observation), **locality**(one’s measurement does not influence the outcome of the other’s measurement)
+    - Bell test: $p(xy|XY ) =∑_λp(λ) p(x|X, λ) p(y|Y, λ)$ , hidden variable λ
+    - CHSH Inequality: $S = X_0Y_0 + X_0Y_1 + X_1Y_0 − X_1Y_1$ , quantum theory $2<⟨S⟩ ≤ 2\sqrt{2}$
+
+### Entangled state
+
+- Definition: A pure state |ψ⟩ can’t be written as a product state; A mixed state ρ can’t be written as a convex sum of product states
+- Entanglement determination (an NP-hard problem, in general):
+    
+    entanglement entropy, concurrence, positive partial transpose criterion, linear (or nonlinear), entanglement witness, symmetric extension…
+    
+- Entanglement measure:
+    - local operations and classical communication (LOCC) channel: implemented by a sequence of local actions and an exchange of classical communication.
+    - All separable states are LOCC equivalent.
+- Bipartite system entanglement:
+    - Schmidt decomposition
+        
+        $|ψ⟩ =K∑_{i=1}λ_i|i_A⟩|i_B$  $|ψ⟩ =∑_{ijk}U_{ji}Λ_{ii}V_{ik}|j⟩|k⟩$
+        
+    - Entanglement entropy
+        
+        $E(|ψ⟩) = − Tr(ρ_A log ρ_A) = − Tr(ρ_B log ρ_B)$   E>0, entangled
+        
+    - Concurrence for two-qubit states: pure state — $C(|ψ⟩) =\sqrt{2}[1 − Tr(ρ^2_A)]$, mixed state — $C(ρ) = min_{
+    |ψ_i⟩}
+    ∑_i p_iC(|ψ_i⟩)$
+    - Positive Partial Transpose (PPT) criterion: $ρ^{T_B} = (I ⊗ T)(ρ)$
+- Entanglement Witness
+    
+    $Tr(W_σ) ≥ 0$, if σ is separable
+    
+
+---
+
+## VI. Theory of computation — What, Algorithms, and Complexity
+
+### What is computation?
+
+- computational problem (may be solved by an algorithm):
+    
+    types: decision problem, search problem, optimization problem, counting problem
+    
+    examples: Seven Bridges of Königsberg(Eulerian Path), Primality Testing, Number Factorization, Modular Exponential Problem, Discrete Logarithm Problem, Systems of Linear Equations, Linear Programming…
+    
+    An algorithm is a set of rules that precisely defines a sequence of operations such that each rule is effective and definite and such that the sequence terminates in a **finite** time.
+    
+- Analogue computer
+    
+    Integrator Circuit
+    
+- Universal Computing Machine
+- Hilbert’s Program
+    
+    Crises in Foundations of Mathematics(The Irrationality of Pythagoreans), Euclidean Geometry, Russell’s Paradox,
+    
+    Hilbert’s Program to formalize mathematics
+    
+    Gödel’s Incompleteness Theorems
+    
+    Entscheidungsproblem
+    
+- Turing Machine
+    - process:
+        
+        Examining an individual symbol on the paper;
+        Erasing a symbol or replacing it by another;
+        Transferring attention from one symbol to another nearby symbol.
+        
+    - 7-tuple:
+        
+        Q is the set of states,
+        Σ is the input alphabet not containing the blank symbol ⊔,
+        Γ is the tape alphabet, where ⊔ ∈ Γ and Σ ⊆ Γ,
+        δ : Q × Γ → Q × Γ × {L, R} is the transition function,
+        q0 ∈ Q is the start state,
+        qaccept ∈ Q is the accept state,
+        qreject ∈ Q is the reject state, where qreject ̸= qaccept.
+        
+    - Robustness of Turing Machine Model:
+        
+        Every multitape Turing machine has an equivalent single-tape Turing machine.
+        
+        Nondeterministic Turing machine, at any point in a computation, the machine
+        may proceed according to one of several transition functions {δ0, δ1, ...}.
+        
+        Every nondeterministic Turing machine has an equivalent Turing machine.
+        
+- Church-Turing thesis
+    - Every physically realizable computation device can be simulated by a Turing machine.
+    - strong Church-Turing thesis:
+        
+        Any algorithmic process can be simulated efficiently using a probabilistic Turing machine.
+        
+        or      Any model of computation can be simulated on a probabilistic Turing machine with at most a polynomial increase in the number of elementary operations required.
+        
+
+---
+
+## VII. Principles of Quantum Computation — Quantum circuit, Quantum Algorinthms
+
+### Quantum circuit
+
+![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%207.png)
+
+- qubit
+- quantum gate
+    - Single-Qubit Gate:
+        - $X=\left(\begin{array}{cc}
+        0 & 1 \\
+        1 & 0
+        \end{array}\right), \quad Y=\left(\begin{array}{cc}
+        0 & -i \\
+        i & 0
+        \end{array}\right), \quad Z=\left(\begin{array}{cc}
+        1 & 0 \\
+        0 & -1
+        \end{array}\right)$
+            
+            $H=\frac{1}{\sqrt{2}}\left(\begin{array}{cc}
+            1 & 1 \\
+            1 & -1
+            \end{array}\right), \quad S=\left(\begin{array}{cc}
+            1 & 0 \\
+            0 & i
+            \end{array}\right), \quad T=\left(\begin{array}{cc}
+            1 & 0 \\
+            0 & e^{i \pi / 4}
+            \end{array}\right)$
+            
+        - $x ∈ R$,  $A^2 = I$, then  $e^{iAx} = cos(x)I + i sin(x)A$
+            
+            $\begin{aligned}
+            & R_x(\theta)=e^{-i \theta X / 2}=\cos \frac{\theta}{2} I-i \sin \frac{\theta}{2} X, \\
+            & R_y(\theta)=e^{-i \theta Y / 2}=\cos \frac{\theta}{2} I-i \sin \frac{\theta}{2} Y, \\
+            & R_z(\theta)=e^{-i \theta Z / 2}=\cos \frac{\theta}{2} I-i \sin \frac{\theta}{2} Z .
+            \end{aligned}$
+            
+            $\begin{aligned}
+            R_n(\theta) & =\exp \left[-i \theta\left(\boldsymbol{n}_x X+\boldsymbol{n}_y Y+\boldsymbol{n}_z Z\right) / 2\right] \\
+            & =\cos \frac{\theta}{2} I-i \sin \frac{\theta}{2}\left(\boldsymbol{n}_x X+\boldsymbol{n}_y Y+\boldsymbol{n}_z Z\right)
+            \end{aligned}$
+            
+        - Any single-qubit gate is a rotational gate with a global phase$U = e^{iα}R_n(θ)$
+        - ZYZ Decomposition:
+            
+            $\begin{aligned}
+            U & =e^{i \alpha} R_z(\beta) R_y(\gamma) R_z(\delta) \\
+            & =e^{i \alpha}\left[\begin{array}{cc}
+            e^{-i \beta / 2} & 0 \\
+            0 & e^{i \beta / 2}
+            \end{array}\right]\left[\begin{array}{cc}
+            \cos (\gamma / 2) & -\sin (\gamma / 2) \\
+            \sin (\gamma / 2) & \cos (\gamma / 2)
+            \end{array}\right]\left[\begin{array}{cc}
+            e^{-i \delta / 2} & 0 \\
+            0 & e^{i \delta / 2}
+            \end{array}\right]
+            \end{aligned}$
+            
+        
+    - Two-Qubit Gate
+        - CNOT, CZ
+            
+            $U_{\mathrm{CNOT}}=\left(\begin{array}{cccc}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 1 & 0
+            \end{array}\right)=|0\rangle\langle 0|\otimes I+| 1\rangle\langle 1| \otimes Z$ 
+            
+            ![                  “copy” operation ](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%208.png)
+            
+                              “copy” operation 
+            
+            ![  $|0\rangle|0\rangle \rightarrow \frac{|0\rangle+|1\rangle}{\sqrt{2}}|0\rangle \rightarrow \frac{|00\rangle+|11\rangle}{\sqrt{2}}$ ](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%209.png)
+            
+              $|0\rangle|0\rangle \rightarrow \frac{|0\rangle+|1\rangle}{\sqrt{2}}|0\rangle \rightarrow \frac{|00\rangle+|11\rangle}{\sqrt{2}}$ 
+            
+            $U_{\mathrm{CZ}}=\left(\begin{array}{cccc}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 0 & 0 & -1
+            \end{array}\right)=|0\rangle\langle 0|\otimes I+| 1\rangle\langle 1|$
+            
+            ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2010.png)
+            
+        - SWAP
+            
+            $U_{\text {iSWAP }}=\left(\begin{array}{cccc}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1
+            \end{array}\right)$
+            
+            ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2011.png)
+            
+        - iSWAP
+            
+            $U_{\text {iSWAP }}=\left(\begin{array}{cccc}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & -i & 0 \\
+            0 & -i & 0 & 0 \\
+            0 & 0 & 0 & 1
+            \end{array}\right)$
+            
+            ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2012.png)
+            
+    - Three-qubit Gate
+        
+        ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2013.png)
+        
+        Toffoli gate can simulate the AND gate:   $0 ⊕ ab = (ab)$
+        
+    - Multi-qubit Controlled Operations
+        
+        ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2014.png)
+        
+- quantum circuit
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2015.png)
+    
+    ![                                   Quantum Teleportation Circuit](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2016.png)
+    
+                                       Quantum Teleportation Circuit
+    
+    examples: (Quantum Circuit Synthesis)
+    
+    1. Circuit for $C^n(U)$
+        
+        ![                                            C^1(U)](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2017.png)
+        
+                                                    C^1(U)
+        
+        ![                                            C^2(U)](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2018.png)
+        
+                                                    C^2(U)
+        
+        ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2019.png)
+        
+    2. Circuit for General Operations
+        
+        ![                                         General Two-qubit Gates](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2020.png)
+        
+                                                 General Two-qubit Gates
+        
+        ![                                        General Three-qubit Gates ](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2021.png)
+        
+                                                General Three-qubit Gates 
+        
+- unverisal quantum gate set
+    - {Two-level Unitary Gate}
+    - {Single-qubit gate, CNOT}: arbitrary two-level unitary operation on n-qubits
+    - Discrete Set of Universal Gates
+        - {Hadamard, T, CNOT}
+            
+            {Hadamard, T} to approximate any single-qubit unitary
+            
+        - {Hadamard, phase, CNOT, Toffoli}
+    - Equivalence Between Universal Gate Sets
+        
+        Fix two universal gate sets that are closed under inverses. Then any t-gate circuit using one gate set can be implemented to precision ϵ using a circuit of t poly(log t/ϵ) gates from other set (indeed, there is a classical algorithm for finding this circuit in time t poly(log t/ϵ).
+        
+
+### Quantum algorinthm
+
+![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2022.png)
+
+- Deutsch’s algorithm
+    
+    problem: Given a Boolean function f : {0, 1} → {0, 1}, how may evaluations of f do we need to determine whether f is constant
+    
+    Classical: A classical deterministic algorithm requires at least two queries of f.
+    
+    query f(0), f(1) respectively
+    
+    Quantum：$U_f : |x⟩|y⟩ → |x⟩|y ⊕ f(x)⟩$
+    
+    if f(x) is constant, then $f(0)=f(1)$
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2023.png)
+    
+    $\begin{aligned}
+    U_f(|+⟩|−⟩) &= \frac{1}{2}U_f[(|0⟩ + |1⟩)(|0⟩ − |1⟩)]\\&= \frac{1}{2}∑_x^1=0|x⟩ (|0 ⊕ f(x)⟩ − |1 ⊕ f(x)⟩)\\
+    &=\left\{
+    \begin{aligned}
+    &±|+⟩|−⟩\text{ , if } f(0) = f(1),\\
+    &±|−⟩|−⟩\text{ , if }f(0) \neq f(1)
+    \end{aligned}\right.
+    \end{aligned}$
+    
+    A crucial step is,
+    $(|0⟩ + |1⟩)|y⟩ → |0⟩|y ⊕ f(0)⟩ + |1⟩|y ⊕ f(1)⟩$
+    
+    we have two observations:
+    ¢ put focus on number of evaluations
+    ¢ the ability to generate superposition states
+    
+- Deutsch-Jozsa algorithm
+    
+     $f : \{0, 1\}^n → {0, 1}$        constant: identical for all inputs;  balanced: equal to 1 for exactly half of all the possible inputs
+    
+    Classaical:
+    
+    Quantum: $U_f : |x⟩|y⟩ → |x⟩|y ⊕ f(x)⟩$
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2024.png)
+    
+- Quantum Fourier Transform (QFT)
+    
+    $g_{y}=\frac{1}{\sqrt{N}} \sum_{x=0}^{N-1} f_{x} e^{2 \pi i x y / N}~~~~~~~
+    
+    |x\rangle \rightarrow \frac{1}{\sqrt{N}} \sum_{y=0}^{N-1} e^{2 \pi i x y / N}|y\rangle
+    ~~~~~~~$
+    
+    $\sum_{x=0}^{N-1} f_{x}|x\rangle \rightarrow \sum_{y=0}^{N-1} g_{y}|y\rangle
+      ~~~~~~F T:\left(\begin{array}{c}f_{0} \\f_{1} \\\vdots \\f_{N-1}\end{array}\right) \rightarrow\left(\begin{array}{c}g_{0} \\g_{1} \\\vdots \\g_{N-1}\end{array}\right)$
+    
+     $\mathbb{Z}_{2}^{n}=\mathbb{Z}_{2} \times \mathbb{Z}_{2} \times \cdots \times \mathbb{Z}_{2}
+    \text{ is not }
+    \mathbb{Z}_{2^{n}}$ 
+    
+    - DFT
+        
+        $g_k=\frac{1}{\sqrt{N}} \sum_{j=0}^{N-1} f_j e^{2 \pi i j k / N} ,   ~~~~~~~~\omega=e^{2\pi i/N}$
+        
+        $\left(\begin{array}{c}
+        g_0 \\
+        g_1 \\
+        g_2 \\
+        \vdots \\
+        g_{N-1}
+        \end{array}\right)=\left[\begin{array}{ccccc}
+        \omega^{0 \times 0} & \omega^{1 \times 0} & \omega^{2 \times 0} & \cdots & \omega^{(N-1) \times 0} \\
+        \omega^{0 \times 1} & \omega^{1 \times 1} & \omega^{2 \times 1} & \cdots & \omega^{(N-1) \times 1} \\
+        \omega^{0 \times 2} & \omega^{1 \times 2} & \omega^{2 \times 2} & \cdots & \omega^{(N-1) \times 2} \\
+        \vdots & \vdots & \vdots & \ddots & \vdots \\
+        \omega^{0 \times(N-1)} & \omega^{1 \times(N-1)} & \omega^{2 \times(N-1)} & \cdots & \omega^{(N-1) \times(N-1)}
+        \end{array}\right]\left(\begin{array}{c}
+        f_0 \\
+        f_1 \\
+        f_2 \\
+        \vdots \\
+        f_{N-1}
+        \end{array}\right)$
+        
+    - FFT
+        
+        $N=2^n$
+        
+        $\begin{aligned}
+        g_k & =\frac{1}{\sqrt{N}} \sum_{j=0}^{N-1} f_j e^{2 \pi i j k / N}, \\
+        & =\frac{1}{\sqrt{N}}\left[\sum_{j \text { even }}^{N-1} f_j e^{2 \pi i j k / N}+\sum_{j \text { odd }}^{N-1} f_j e^{2 \pi i j k / N}\right] \\
+        & =\frac{1}{\sqrt{N}}\left[\sum_{l=0}^{N / 2-1} f_{2 l} e^{2 \pi i 2 l k / N}+e^{2 \pi i k / N} \sum_{l=0}^{N / 2-1} f_{2 l+1} e^{2 \pi i 2 l k / N}\right] \\
+        & =\frac{1}{\sqrt{2}}\left[\frac{1}{\sqrt{N / 2}} \sum_{l=0}^{N / 2-1} A_l e^{2 \pi i l k /(N / 2)}+e^{2 \pi i k / N} \frac{1}{\sqrt{N / 2}} \sum_{l=0}^{N / 2-1} B_l e^{2 \pi i l k /(N / 2)}\right]
+        \end{aligned}$
+        
+        where $A_l=f_{2 l}, B_l=f_{2 l+1}$, this results in a recursive formula
+        
+        $g_k=\left\{\begin{array}{ll}
+        \frac{1}{\sqrt{2}}\left[a_k+e^{2 \pi i k / N} b_k\right], & k=0,1, \ldots, N / 2-1, \\
+        \frac{1}{\sqrt{2}}\left[a_{k-N / 2}-e^{2 \pi i k / N} b_{k-N / 2}\right], & k=N / 2, N / 2+1, \ldots, N-1,
+        \end{array}\right.$
+        
+        $a_k=\frac{1}{\sqrt{N / 2}} \sum_{l=0}^{N / 2-1} A_l e^{2 \pi i l k /(N / 2)}, \quad b_k=\frac{1}{\sqrt{N / 2}} \sum_{l=0}^{N / 2-1} B_l e^{2 \pi i l k /(N / 2)}$ 
+        
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2025.png)
+    
+    $T (N ) = 2T (N /2) + \Theta (N ) = 2^2T (N /4) + 2\Theta(N ) = ... = 2^kT (N /2^k) + k\Theta(N )$
+    
+    $k=log N,~~~~~~~~~T (N ) = NT(1) + \Theta log N = \Theta(Nlog N )$
+    
+    - QFT
+        
+        $\begin{aligned}
+         |j\rangle &\rightarrow \frac{1}{2^{n / 2}} \sum_{k=0}^{2^n-1} e^{2 \pi i j k / 2^n}|k\rangle \text{~~~~十进制转二进制}\\
+        & =\frac{1}{2^{n / 2}} \sum_{k_1=0}^1 \cdots \sum_{k_n=0}^1 e^{2 \pi i j \sum_{l=1}^n k_1 2^{-i}}\left|k_1 \ldots k_n\right\rangle \\
+        & =\frac{1}{2^{n / 2}} \sum_{k_1=0}^1 \cdots \sum_{k_n=0}^1 \bigotimes_{l=1}^n e^{2 \pi i j k_l 2^{-1}}\left|k_l\right\rangle \\
+        & =\frac{1}{2^{n / 2}} \bigotimes_{i=1}^n\left[\sum_{k_l=0}^1 e^{2 \pi i j k_l 2^{-1}}\left|k_i\right\rangle\right] \\
+        & =\frac{1}{2^{n / 2}} \bigotimes_{l=1}^n\left[|0\rangle+e^{2 \pi i 2^{-l}}|1\rangle\right] \\
+        & =\frac{\left(|0\rangle+e^{2 \pi i 0} j_n|1\rangle\right)\left(|0\rangle+e^{2 \pi i 0, j_{n-1, j n}}|1\rangle\right) \cdots\left(|0\rangle+e^{2 \pi i 0, j_1 j_2 \cdots j_n}|1\rangle\right)}{2^{n / 2}} \\
+        &
+        \end{aligned}$
+        
+        $0.j_1j_2...j_n=\sum_{l=1}^{n}j_l2^{-l}$    第一个‘.’是小数点，二进制分数
+        
+        ![                         An efficient circuit for quantum Fourier transform, $R_k=\left[\begin{array}{cc}
+        1 & 0 \\
+        0 & e^{2 \pi i / 2^k}
+        \end{array}\right]$](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2026.png)
+        
+                                 An efficient circuit for quantum Fourier transform, $R_k=\left[\begin{array}{cc}
+        1 & 0 \\
+        0 & e^{2 \pi i / 2^k}
+        \end{array}\right]$
+        
+        The number of gates of the circuit is: $n+(n-1)+\cdots+1=n(n+1) / 2$ 
+        
+- Quantum Phase Estimation
+    - one bit: binary decimal notation $\varphi=0.\varphi_1$
+        
+        ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2027.png)
+        
+        $\begin{aligned}
+        |0⟩|u⟩ &→ |0⟩ + |1⟩|u⟩\\
+        &→ |0⟩|u⟩ + |1⟩U|u⟩\\
+        &= |0⟩|u⟩ + e^{2πi0.φ_1}|1⟩|u⟩\\&→\left\{
+        \begin{aligned}&|0⟩|u⟩,\text{if }φ_1 = 0,\\&|1⟩|u⟩,\text{if } φ_1 = 1
+        \end{aligned}\right.
+        \end{aligned}$
+        
+        controlled-U gate will give phase to contolle qubit
+        
+    - general: $\varphi \in[0,1],~~~\varphi=0.\varphi_1\varphi_2\varphi_3...$
+    
+    ![                                                 first stage circuit](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2028.png)
+    
+                                                     first stage circuit
+    
+    $\begin{aligned}
+    |0\rangle|u\rangle \rightarrow
+    &\frac{1}{\sqrt{2^{t}}} ( |0〉 + e^{2πi2^{t−1}φ}|1〉 )( |0〉 + e^{2πi2^{t−2}φ}|1〉 ) ... ( |0〉 + e^{2πi2^{0}φ}|1〉 ) 
+    \\=&\frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1} e^{2 \pi i \varphi k/ 2^{t}}|k\rangle|u\rangle
+    \\=&\frac{1}{\sqrt{2^{t}}} \sum_{k=0}^{2^{t}-1}|j\rangle|u\rangle
+    \\
+    
+    \end{aligned}$
+    
+    写成二进制：
+    
+    $\begin{aligned}
+    |0\rangle|u\rangle \rightarrow
+    &\frac{1}{\sqrt{2^{t}}} ( |0〉+ e^{2πi0.φ_t}|1)( |0〉+ e^{2πi0.φ_{t-1}φ_t}|1〉) ... ( |0〉 + e^{2πi0.φ_1φ_2...φ_t}|1〉 ) 
+    \end{aligned}$
+    
+    对于初态是$|0\rangle^{\otimes n}$系统，QFT与$H^{\otimes n}$结果一样，都是：
+    
+    $\frac{1}{\sqrt{2^{n}}} ( |0〉+ |1)( |0〉+ |1〉) ... ( |0〉 + |1〉 )$ 
+    
+    controlled-U gates:
+    
+               $\begin{aligned}
+    \frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1}|j\rangle|u\rangle & \rightarrow \frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1}|j\rangle U^{j}|u\rangle, \\
+    & =\frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1} e^{2 \pi i \varphi_t j}|j\rangle|u\rangle \\
+    & =\frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1} e^{2 \pi i \tilde{\varphi} j / 2^{t}}|j\rangle|u\rangle,
+    \\
+    \text{where,}\tilde{\varphi}  =\varphi \cdot 2^{t}&=\varphi_{1} \varphi_{2} \cdots \varphi_{t}+0 . \varphi_{t+1} \varphi_{t+2} \cdots
+    \end{aligned}$
+    
+    after that, will give phase to controlled qubits, like the one case
+    
+    Second stage: apply an inverse QFT to the first register gives  $\frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1} e^{2 \pi i \tilde{\varphi} j / 2^{t}}|j\rangle \rightarrow\left|\varphi_{1} \varphi_{2} \cdots \varphi_{t}\right\rangle$ 
+    
+    $\begin{aligned}
+    \frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1} e^{2 \pi i \tilde{\varphi} j / 2^{t}}|j\rangle 
+    &\rightarrow \frac{1}{\sqrt{2^{t}}} \sum_{j=0}^{2^{t}-1} e^{2 \pi i \tilde{\varphi} j / 2^{t}}|j\rangle\frac{1}{\sqrt{2^{t}}} \sum_{k=0}^{2^{t}-1} e^{-2 \pi i jk / 2^{t}}|j\rangle\\
+    &=\frac{1}{2^{t}} \sum_{j=0}^{2^{t}-1}\sum_{k=0}^{2^{t}-1} e^{2 \pi i (\tilde{\varphi}-k) j / 2^{t}}|k\rangle|u\rangle \\
+    &=\frac{1}{2^{t}} \sum_{j=0}^{2^{t}-1}\sum_{k=0}^{2^{t}-1}  e^{2 \pi i (\tilde{\varphi}-k) j / 2^{t}}|k\rangle|u\rangle \\
+    &=\frac{1}{2^{t}} \sum_{j=0}^{2^{t}-1} 
+    |\tilde{\varphi}\rangle|u\rangle \\
+    &=\frac{1}{2^{t}} 2^t|\tilde{\varphi}\rangle|u\rangle \\
+    &=\left|\varphi_{1} \varphi_{2} \cdots \varphi_{t}\right\rangle 
+    \end{aligned}$
+    
+    Summary:  Phase estimation algorithm estimates the unknown phase φ up to t-bits with using $O(t^2)$ operations.
+    
+- Shor’s Factoring Algorithm
+- Amplitude Amplification Technique
+Grover’s Algorithm
+
+### Quantum Simulation
+
+Quantum Simulators, Science 326, 108 (2009). 
+
+Quantum simulation, Rev. Mod. Phys. 86, 153 (2014).
+Practical quantum advantage in quantum simulation, Nature 607, 667 (2022).
+
+- Some Common Classical Methods
+    
+    Solvable Models，Perturbation Theory，Matrix Product State，Machine Learning，Brute-force: Exact Diagonalization
+    
+- Quantum simulation
+    - General Method
+        
+        ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2029.png)
+        
+    - Analog Quantum Simulation
+        
+        $H_{system} ↔ H_{simulator}$
+        
+    - Digital Quantum Simulation
+        - Trotterization Technique
+            
+            A and B be Hermitian operators, any real t
+            
+            $\lim\limits_{n→∞}(e^{iAt/n}e^{iBt/n})^n= e^{i(A+B)t}$
+            
+        - Algorithm
+            
+            many-body Hamiltonian $H = ∑_kH_k$, small time step  $∆t = t/n$
+            
+            $e^{−i(H_1+H_2+···+H_L)t} =(e^{−i(H_1+H_2+···+H_L)∆t})^n≈(e^{−iH_1∆t}e^{−iH_2∆t} · · · e^{−iH_L∆t})^n$
+            
+        - Physical Realization
+        - Application
+            
+            Quantum simulation, Rev. Mod. Phys. 86, 153 (2014)
+            
+            condensed-matter physics
+            • Hubbard models
+            • spin models
+            • quantum phase transitions
+            • spin glasses
+            • disordered systems
+            • topological order
+            • ......
+            high-energy physics
+            chemistry
+            open quantum system
+            
+
+---
+
+## VIII. Physical Realizations of Quantum Computation — Divincenzo's criteria 、Physical System、Quantum Gate
+
+### Divincenzo's criteria
+
+five for quantum computation:
+
+- well-defined and scalable qubits     (two-level quantum systems, two-dimensional subspace of larger system, encoded qubits)
+- intialization to a pure state
+- long coherence times
+- unverisal set of quantum gates             (copuling networks, fidelity, speed)
+- qubits-specific measurement
+
+additional for quantum communication
+
+- the ability to interconvert stationary and flying qubit
+- the ability to faithfully transmit flying qubits between specified locations
+
+### Quantum tomgraphy
+
+- Quantum state tomography
+    - Standard QST
+    - Learning-based QST
+- Quantum process tomography
+- Quantum Hamiltonian Tomography
+
+### Physical system:
+
+1. Nuclear Magnetic Resonace
+2. Trapped ions
+3. superconductor 
+4. Semiconductor
+
+### Quantum gate
+
+➢ Perturbative methods:
+
+Problem Formulation➡Perturbative Approximation➡Pulse Ansatz➡Parameter Adjustment➡Optimization
+
+- Representation transformation
+    
+    $\dot U(t) = −iH(t)U(t)$,  frame transformation  $U(t) = V (t)U(t)$
+    
+    $\dot U(t) = \dot V (t)U(t) + V (t) \dot U(t)
+    = \dot V (t)V^†(t) \widetilde U(t) − iV (t)H(t)V^†(t)\widetilde U(t)
+    = −i[ V (t)H(t)V^†(t) + i \dot V (t)V^†(t)]\widetilde U(t)$ 
+     Hamiltonian in the transformed frame is $\widetilde H=VHV^† + i \dot V V^†$
+    
+- State transfer via adiabatic passage
+    
+    $H(t) = s(t)H_0 + (1 − s(t))H_1$  adiabatic evolution
+    
+- Magnus expansion (to mean Hamiltonian)
+- Dyson expansion (to mean evolution operator)
+- Adiabatic elimination (Quantum optics )
+- Schrieffer-Wolff Transformation (superconducting)
+
+➢ common systems：
+
+- Two level model
+    - Resonant control (Rabi model), $∫Ω(t)dt = π$
+        - 旋转框架演化算符
+    - Adiabatic passage (Laudau-Zener model), fix Ω = const, and tune ω(t) slowly
+- Three level model
+    - Ladder System: Leakage Problem
+    - $Λ$  System
+- spin model
+    - Ising Model
+    - Central Spin Model
+- Jaynes - Cumming model
+    
+    $H = ω_{eg}σ_z + ωa^†a + g(x)(a^†σ^− + aσ^†)$
+    
+    atom➡ a two-level system，electromagnetic field➡ a single mode， interaction term, the atom-field dipole interaction g(x) whose dependence on x is determined by the shape of the cavity mode
+    
+
+---
+
+## IX. Quantum error correction (QEC)
+
+• Knill E, Laflamme R. Theory of quantum error-correcting codes. Phys Rev A. 1997;55(2):900–911
+• Nelson, Chuang, QPQI
+• Joschka Roffe, Contemporary Physics, 60:3, 226-245 (2019)
+• M. Hein, W. Dür, J. Eisert, R. Raussendorf, M. Van den Nest, H.-J. Briegel, Entanglement in Graph
+  States and its Applications, arXiv:quant-ph/0602096
+• D. Gottesman, "Stabilizer codes and quantum error correction," quant-ph/9705052, Caltech Ph.D.
+   thesis. [https://arxiv.org/abs/quant-ph/9705052](https://arxiv.org/abs/quant-ph/9705052)
+
+![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2030.png)
+
+![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2031.png)
+
+### Quantum noise
+
+Randomness coupled to the systems’ operators
+
+➢Variations in precession frequency in qubit ensembles (npj Quan. Info. 7, 60 (2021))
+➢ Control pulse deformation (Applied Physics Letters, 116(5):054001, 2020)
+➢ Population leakage out of computational subspace (Nature Communications 12, 1761 (2021))
+➢ Hybridization of levels ( npj Quan. Info. 5,19(2019))
+➢ TLS defect (Rep. Prog. Phys. 82 124501 (2019); npj Quantum Information (2019) 5:54)
+➢ Purcell effect ⬅Bosonic bath (Phys. Rev. Lett. 106, 030502 (2011))
+➢ Low frequency noise ⬅ Fermionic bath (Phys. Rev. B 85, 174521 (2012); Phys. Rev. Lett. 123, 190502)
+➢ Heating (Phys. Rev. B 85, 174521 (2012))
+➢ Quantum thermalization (ETH) (Journal of Low Temperature Physics 184, 1015 (2016))
+➢ Spectators (Intruders) (Phys. Rev. Applied 14, 024042 (2020))
+➢ Crosstalk (Phys. Rev. Applied 12, 054023 (2019))
+
+➔ Relaxation   ➔ Dephasing   ➔ Coherent errors    ➔ Leakage
+
+### Typical examples of QEC
+
+➢correct errors in classical computers: repetition:
+
+d=2t+1: code distance(needed code numbers), where t is the number of errors the code can correct.
+n: the total number of bits per codeword
+k: the number of encoded bits
+
+➢Challenges of translating classical codes to Quantum:
+
+1. No-cloning theorem
+2. Qubits are susceptible to both bit-flips (X-errors) and phase-flips (Z-errors).
+3. Any measurements of the qubits performed as part of the error correction
+procedure must be carefully chosen so as not to cause the wavefunction to
+collapse and erase the encoded information
+4. Any steps of operation or idling could be involved with errors…
+
+➢Methods:
+
+- Repetition code
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2032.png)
+    
+    ![对易关系决定看稳定子加错误作用后结果（稳定子不改变结果），负值稳定子的控制位是1，正值为0](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2033.png)
+    
+    对易关系决定看稳定子加错误作用后结果（稳定子不改变结果），负值稳定子的控制位是1，正值为0
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2034.png)
+    
+    d=2t+1: code distance(needed code numbers), where t is the number of errors the code can correct.
+    n: the total number of qubits per codeword
+    k: the number of encoded logical qubits
+    
+- Stabilizer code and graph state code [n,k,d]
+    
+    ![Untitled](Quantum%20Computation%20c521eca335114ddf83af50e49ab6013b/Untitled%2035.png)
+    
+- Surface code
+    
+    
+
+### Error correction threshold
